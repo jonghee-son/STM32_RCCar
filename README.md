@@ -1,0 +1,13 @@
+# STM32_RCCar
+Basic RCCar control over USART3
+
+## BOM
+- L298N Motor Driver * 1
+- Robot Car Kit 2WD * 1
+- NUCLEO-F429ZI * 1
+
+## Pinout
+L298N IN1 - NUCLEO-F429ZI PE10</br>
+L298N IN2 - NUCLEO-F429ZI PE12</br>
+L298N IN3 - NUCLEO-F429ZI PE14</br>
+L298N IN4 - NUCLEO-F429ZI PE15</br>
