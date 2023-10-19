@@ -51,11 +51,16 @@ ETH_DMADescTypeDef  DMATxDscrTab[ETH_TX_DESC_CNT]; /* Ethernet Tx DMA Descriptor
 ETH_HandleTypeDef heth;
 
 UART_HandleTypeDef huart3;
+UART_HandleTypeDef huart6;
 
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
 uint8_t TxBuffer[] = "\n\rCar Controller\n\r w: forward a: left s: backward d: right else: stop\n\r";
+uint8_t ATCommandCheckComm[] = "AT";
+uint8_t ATCommandChangeBaud[] = "AT+BAUD8";
+uint8_t ATCommandChangeName[] = "AT+NAMERcCar";
+uint8_t ATCommandChangePin[] = "AT+PIN1115";
 uint8_t RxBuffer[RxBufferSize];
 /* USER CODE END PV */
 
@@ -65,6 +70,7 @@ static void MX_GPIO_Init(void);
 static void MX_ETH_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
+static void MX_USART6_UART_Init(void);
 /* USER CODE BEGIN PFP */
 void motor1_forward(void);
 void motor2_forward(void);
@@ -113,15 +119,36 @@ int main(void)
 	MX_ETH_Init();
 	MX_USART3_UART_Init();
 	MX_USB_OTG_FS_PCD_Init();
+	MX_USART6_UART_Init();
 	/* USER CODE BEGIN 2 */
-	HAL_UART_Transmit(&huart3, (uint8_t*)TxBuffer, TxBufferSize , 0xFFFF);
+	HAL_UART_Transmit(&huart6, (uint8_t*)ATCommandCheck, TxBufferSize, 0xFFFF);
+	HAL_UART_Receive(&huart6, (uint8_t*)RxBuffer, 2);
+
+	if (RxBuffer != "OK") {
+		huart6.Init.BaudRate = 9600; // Change baudrate to 9600 to fit HC-06's initial baudrate
+		if (HAL_UART_Init(&huart6) != HAL_OK) {
+			Error_Handler();
+		}
+
+		/* HC-06 module configuration with AT command */
+		HAL_UART_Transmit(&huart6, (uint8_t*)ATCommandChangeBaud, TxBufferSize, 0xFFFF);
+		HAL_UART_Transmit(&huart6, (uint8_t*)ATCommandChangeName, TxBufferSize, 0xFFFF);
+		HAL_UART_Transmit(&huart6, (uint8_t*)ATCommandChangePin, TxBufferSize, 0xFFFF);
+
+		huart6.Init.BaudRate = 115200; // Change baudrate to desired baudrate of 115200
+		if (HAL_UART_Init(&huart6) != HAL_OK) {
+			Error_Handler();
+		}
+	}
+
+	HAL_UART_Transmit(&huart6, (uint8_t*)TxBuffer, TxBufferSize , 0xFFFF);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1)
 	{
-		HAL_UART_Receive_IT(&huart3, (uint8_t*)RxBuffer,1);
+		HAL_UART_Receive_IT(&huart6, (uint8_t*)RxBuffer,1);
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
@@ -253,6 +280,39 @@ static void MX_USART3_UART_Init(void)
 	/* USER CODE BEGIN USART3_Init 2 */
 
 	/* USER CODE END USART3_Init 2 */
+
+}
+
+/**
+ * @brief USART6 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_USART6_UART_Init(void)
+{
+
+	/* USER CODE BEGIN USART6_Init 0 */
+
+	/* USER CODE END USART6_Init 0 */
+
+	/* USER CODE BEGIN USART6_Init 1 */
+
+	/* USER CODE END USART6_Init 1 */
+	huart6.Instance = USART6;
+	huart6.Init.BaudRate = 115200;
+	huart6.Init.WordLength = UART_WORDLENGTH_8B;
+	huart6.Init.StopBits = UART_STOPBITS_1;
+	huart6.Init.Parity = UART_PARITY_NONE;
+	huart6.Init.Mode = UART_MODE_TX_RX;
+	huart6.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	huart6.Init.OverSampling = UART_OVERSAMPLING_16;
+	if (HAL_UART_Init(&huart6) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	/* USER CODE BEGIN USART6_Init 2 */
+
+	/* USER CODE END USART6_Init 2 */
 
 }
 

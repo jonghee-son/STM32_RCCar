@@ -1,5 +1,5 @@
 # STM32_RCCar
-Basic RCCar control over USART3
+Basic RCCar control over USART6 (HC-06)
 
 ## BOM
 - L298N Motor Driver * 1
