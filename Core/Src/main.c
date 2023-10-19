@@ -131,9 +131,9 @@ int main(void)
 		}
 
 		/* HC-06 module configuration with AT command */
-		HAL_UART_Transmit(&huart6, (uint8_t*)ATCommandChangeBaud, TxBufferSize, 0xFFFF);
 		HAL_UART_Transmit(&huart6, (uint8_t*)ATCommandChangeName, TxBufferSize, 0xFFFF);
 		HAL_UART_Transmit(&huart6, (uint8_t*)ATCommandChangePin, TxBufferSize, 0xFFFF);
+		HAL_UART_Transmit(&huart6, (uint8_t*)ATCommandChangeBaud, TxBufferSize, 0xFFFF);
 
 		huart6.Init.BaudRate = 115200; // Change baudrate to desired baudrate of 115200
 		if (HAL_UART_Init(&huart6) != HAL_OK) {
