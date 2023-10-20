@@ -52,7 +52,6 @@
 /* USER CODE BEGIN PV */
 uint8_t TxBuffer[] = "\n\rCar Controller\n\r w: forward a: left s: backward d: right else: stop\n\r";
 uint8_t RxBuffer[RxBufferSize];
-uint8_t tx_data[NRF24L01P_PAYLOAD_LENGTH] = {0, 1, 2, 3, 4, 5, 6, 7};
 uint8_t rx_data[NRF24L01P_PAYLOAD_LENGTH] = { 0, };
 /* USER CODE END PV */
 

@@ -6,6 +6,7 @@
  */
 
 #include "motor.h"
+#include "main.h"
 
 void motor1_forward(void)
 {
