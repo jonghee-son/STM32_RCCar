@@ -59,15 +59,7 @@ uint8_t rx_data[NRF24L01P_PAYLOAD_LENGTH] = { 0, };
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-void motor1_forward(void);
-void motor2_forward(void);
-void motor1_backward(void);
-void motor2_backward(void);
-void go_forward(void);
-void go_backward(void);
-void go_left(void);
-void go_right(void);
-void stop(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
