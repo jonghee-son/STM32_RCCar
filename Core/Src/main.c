@@ -18,11 +18,16 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "string.h"
+#include "eth.h"
+#include "spi.h"
+#include "usart.h"
+#include "usb_otg.h"
+#include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "nrf24l01p.h"
+#include "motor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,29 +49,15 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-ETH_TxPacketConfig TxConfig;
-ETH_DMADescTypeDef  DMARxDscrTab[ETH_RX_DESC_CNT]; /* Ethernet Rx DMA Descriptors */
-ETH_DMADescTypeDef  DMATxDscrTab[ETH_TX_DESC_CNT]; /* Ethernet Tx DMA Descriptors */
-
-ETH_HandleTypeDef heth;
-
-UART_HandleTypeDef huart3;
-UART_HandleTypeDef huart6;
-
-PCD_HandleTypeDef hpcd_USB_OTG_FS;
-
 /* USER CODE BEGIN PV */
 uint8_t TxBuffer[] = "\n\rCar Controller\n\r w: forward a: left s: backward d: right else: stop\n\r";
 uint8_t RxBuffer[RxBufferSize];
+uint8_t tx_data[NRF24L01P_PAYLOAD_LENGTH] = {0, 1, 2, 3, 4, 5, 6, 7};
+uint8_t rx_data[NRF24L01P_PAYLOAD_LENGTH] = { 0, };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
-static void MX_ETH_Init(void);
-static void MX_USART3_UART_Init(void);
-static void MX_USB_OTG_FS_PCD_Init(void);
-static void MX_USART6_UART_Init(void);
 /* USER CODE BEGIN PFP */
 void motor1_forward(void);
 void motor2_forward(void);
@@ -116,7 +107,9 @@ int main(void)
 	MX_USART3_UART_Init();
 	MX_USB_OTG_FS_PCD_Init();
 	MX_USART6_UART_Init();
+	MX_SPI3_Init();
 	/* USER CODE BEGIN 2 */
+	nrf24l01p_rx_init(2500, _1Mbps);
 	HAL_UART_Transmit(&huart6, (uint8_t*)TxBuffer, TxBufferSize , 0xFFFF);
 	/* USER CODE END 2 */
 
@@ -177,279 +170,7 @@ void SystemClock_Config(void)
 	}
 }
 
-/**
- * @brief ETH Initialization Function
- * @param None
- * @retval None
- */
-static void MX_ETH_Init(void)
-{
-
-	/* USER CODE BEGIN ETH_Init 0 */
-
-	/* USER CODE END ETH_Init 0 */
-
-	static uint8_t MACAddr[6];
-
-	/* USER CODE BEGIN ETH_Init 1 */
-
-	/* USER CODE END ETH_Init 1 */
-	heth.Instance = ETH;
-	MACAddr[0] = 0x00;
-	MACAddr[1] = 0x80;
-	MACAddr[2] = 0xE1;
-	MACAddr[3] = 0x00;
-	MACAddr[4] = 0x00;
-	MACAddr[5] = 0x00;
-	heth.Init.MACAddr = &MACAddr[0];
-	heth.Init.MediaInterface = HAL_ETH_RMII_MODE;
-	heth.Init.TxDesc = DMATxDscrTab;
-	heth.Init.RxDesc = DMARxDscrTab;
-	heth.Init.RxBuffLen = 1524;
-
-	/* USER CODE BEGIN MACADDRESS */
-
-	/* USER CODE END MACADDRESS */
-
-	if (HAL_ETH_Init(&heth) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-	memset(&TxConfig, 0 , sizeof(ETH_TxPacketConfig));
-	TxConfig.Attributes = ETH_TX_PACKETS_FEATURES_CSUM | ETH_TX_PACKETS_FEATURES_CRCPAD;
-	TxConfig.ChecksumCtrl = ETH_CHECKSUM_IPHDR_PAYLOAD_INSERT_PHDR_CALC;
-	TxConfig.CRCPadCtrl = ETH_CRC_PAD_INSERT;
-	/* USER CODE BEGIN ETH_Init 2 */
-
-	/* USER CODE END ETH_Init 2 */
-
-}
-
-/**
- * @brief USART3 Initialization Function
- * @param None
- * @retval None
- */
-static void MX_USART3_UART_Init(void)
-{
-
-	/* USER CODE BEGIN USART3_Init 0 */
-
-	/* USER CODE END USART3_Init 0 */
-
-	/* USER CODE BEGIN USART3_Init 1 */
-
-	/* USER CODE END USART3_Init 1 */
-	huart3.Instance = USART3;
-	huart3.Init.BaudRate = 115200;
-	huart3.Init.WordLength = UART_WORDLENGTH_8B;
-	huart3.Init.StopBits = UART_STOPBITS_1;
-	huart3.Init.Parity = UART_PARITY_NONE;
-	huart3.Init.Mode = UART_MODE_TX_RX;
-	huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-	huart3.Init.OverSampling = UART_OVERSAMPLING_16;
-	if (HAL_UART_Init(&huart3) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/* USER CODE BEGIN USART3_Init 2 */
-
-	/* USER CODE END USART3_Init 2 */
-
-}
-
-/**
- * @brief USART6 Initialization Function
- * @param None
- * @retval None
- */
-static void MX_USART6_UART_Init(void)
-{
-
-	/* USER CODE BEGIN USART6_Init 0 */
-
-	/* USER CODE END USART6_Init 0 */
-
-	/* USER CODE BEGIN USART6_Init 1 */
-
-	/* USER CODE END USART6_Init 1 */
-	huart6.Instance = USART6;
-	huart6.Init.BaudRate = 9600;
-	huart6.Init.WordLength = UART_WORDLENGTH_8B;
-	huart6.Init.StopBits = UART_STOPBITS_1;
-	huart6.Init.Parity = UART_PARITY_NONE;
-	huart6.Init.Mode = UART_MODE_TX_RX;
-	huart6.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-	huart6.Init.OverSampling = UART_OVERSAMPLING_16;
-	if (HAL_UART_Init(&huart6) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/* USER CODE BEGIN USART6_Init 2 */
-
-	/* USER CODE END USART6_Init 2 */
-
-}
-
-/**
- * @brief USB_OTG_FS Initialization Function
- * @param None
- * @retval None
- */
-static void MX_USB_OTG_FS_PCD_Init(void)
-{
-
-	/* USER CODE BEGIN USB_OTG_FS_Init 0 */
-
-	/* USER CODE END USB_OTG_FS_Init 0 */
-
-	/* USER CODE BEGIN USB_OTG_FS_Init 1 */
-
-	/* USER CODE END USB_OTG_FS_Init 1 */
-	hpcd_USB_OTG_FS.Instance = USB_OTG_FS;
-	hpcd_USB_OTG_FS.Init.dev_endpoints = 4;
-	hpcd_USB_OTG_FS.Init.speed = PCD_SPEED_FULL;
-	hpcd_USB_OTG_FS.Init.dma_enable = DISABLE;
-	hpcd_USB_OTG_FS.Init.phy_itface = PCD_PHY_EMBEDDED;
-	hpcd_USB_OTG_FS.Init.Sof_enable = ENABLE;
-	hpcd_USB_OTG_FS.Init.low_power_enable = DISABLE;
-	hpcd_USB_OTG_FS.Init.lpm_enable = DISABLE;
-	hpcd_USB_OTG_FS.Init.vbus_sensing_enable = ENABLE;
-	hpcd_USB_OTG_FS.Init.use_dedicated_ep1 = DISABLE;
-	if (HAL_PCD_Init(&hpcd_USB_OTG_FS) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/* USER CODE BEGIN USB_OTG_FS_Init 2 */
-
-	/* USER CODE END USB_OTG_FS_Init 2 */
-
-}
-
-/**
- * @brief GPIO Initialization Function
- * @param None
- * @retval None
- */
-static void MX_GPIO_Init(void)
-{
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
-	/* USER CODE BEGIN MX_GPIO_Init_1 */
-	/* USER CODE END MX_GPIO_Init_1 */
-
-	/* GPIO Ports Clock Enable */
-	__HAL_RCC_GPIOC_CLK_ENABLE();
-	__HAL_RCC_GPIOH_CLK_ENABLE();
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-	__HAL_RCC_GPIOE_CLK_ENABLE();
-	__HAL_RCC_GPIOD_CLK_ENABLE();
-	__HAL_RCC_GPIOG_CLK_ENABLE();
-
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOB, LD1_Pin|LD3_Pin|LD2_Pin, GPIO_PIN_RESET);
-
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_10|GPIO_PIN_12|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_SET);
-
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(USB_PowerSwitchOn_GPIO_Port, USB_PowerSwitchOn_Pin, GPIO_PIN_RESET);
-
-	/*Configure GPIO pin : USER_Btn_Pin */
-	GPIO_InitStruct.Pin = USER_Btn_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(USER_Btn_GPIO_Port, &GPIO_InitStruct);
-
-	/*Configure GPIO pins : LD1_Pin LD3_Pin LD2_Pin */
-	GPIO_InitStruct.Pin = LD1_Pin|LD3_Pin|LD2_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-	/*Configure GPIO pins : PE10 PE12 PE14 PE15 */
-	GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_12|GPIO_PIN_14|GPIO_PIN_15;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
-
-	/*Configure GPIO pin : USB_PowerSwitchOn_Pin */
-	GPIO_InitStruct.Pin = USB_PowerSwitchOn_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(USB_PowerSwitchOn_GPIO_Port, &GPIO_InitStruct);
-
-	/*Configure GPIO pin : USB_OverCurrent_Pin */
-	GPIO_InitStruct.Pin = USB_OverCurrent_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(USB_OverCurrent_GPIO_Port, &GPIO_InitStruct);
-
-	/* USER CODE BEGIN MX_GPIO_Init_2 */
-	/* USER CODE END MX_GPIO_Init_2 */
-}
-
 /* USER CODE BEGIN 4 */
-void motor1_forward(void)
-{
-	HAL_GPIO_WritePin(MOTOR_CONTROL, IN1, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(MOTOR_CONTROL, IN2, GPIO_PIN_RESET);
-}
-
-void motor2_forward(void)
-{
-	HAL_GPIO_WritePin(MOTOR_CONTROL, IN3, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(MOTOR_CONTROL, IN4, GPIO_PIN_RESET);
-}
-
-void motor1_backward(void)
-{
-	HAL_GPIO_WritePin(MOTOR_CONTROL, IN1, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(MOTOR_CONTROL, IN2, GPIO_PIN_SET);
-}
-
-void motor2_backward(void)
-{
-	HAL_GPIO_WritePin(MOTOR_CONTROL, IN3, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(MOTOR_CONTROL, IN4, GPIO_PIN_SET);
-}
-
-void go_forward(void)
-{
-	motor1_forward();
-	motor2_forward();
-}
-
-void go_backward(void)
-{
-	motor1_backward();
-	motor2_backward();
-}
-
-void go_left(void)
-{
-	motor1_backward();
-	motor2_forward();
-}
-
-void go_right(void)
-{
-	motor1_forward();
-	motor2_backward();
-}
-
-void stop(void) // Motor full stop
-{
-	HAL_GPIO_WritePin(MOTOR_CONTROL, IN1, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(MOTOR_CONTROL, IN2, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(MOTOR_CONTROL, IN3, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(MOTOR_CONTROL, IN4, GPIO_PIN_RESET);
-}
-
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandler)
 {
 	HAL_UART_Transmit(UartHandler, (uint8_t*)TxBuffer, TxBufferSize , 0xFFFF);
@@ -467,6 +188,25 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandler)
 		go_backward();
 	} else {
 		stop();
+	}
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	if(GPIO_Pin == NRF24L01P_IRQ_PIN_NUMBER) {
+		nrf24l01p_rx_receive(rx_data); // read data when data ready flag is set
+
+		if (rx_data[0] == 'W' || rx_data[0] == 'w') {
+			go_forward();
+		} else if (rx_data[0] == 'A' || rx_data[0] == 'a') {
+			go_left();
+		} else if (rx_data[0] == 'D' || rx_data[0] == 'd') {
+			go_right();
+		} else if (rx_data[0] == 'S' || rx_data[0] == 's') {
+			go_backward();
+		} else {
+			stop();
+		}
 	}
 }
 /* USER CODE END 4 */
