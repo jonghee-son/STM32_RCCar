@@ -1,10 +1,11 @@
 # STM32_RCCar
-Basic RCCar control over USART6 (HC-06)
+Basic RCCar control over SPI3 (nRF24L01)
 
 ## BOM
 - L298N Motor Driver * 1
 - Robot Car Kit 2WD * 1
 - NUCLEO-F429ZI * 1
+- nRF24L01 * 1
 
 ## Pinout
 L298N IN1 - NUCLEO-F429ZI PE10</br>
