@@ -187,16 +187,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	if(GPIO_Pin == NRF24L01P_IRQ_PIN_NUMBER) {
 		nrf24l01p_rx_receive(rx_data); // read data when data ready flag is set
 
-		if (rx_data[0] == 'W' || rx_data[0] == 'w') {
+		if (rx_data[0] == (uint8_t)1) {
 			go_forward();
-		} else if (rx_data[0] == 'A' || rx_data[0] == 'a') {
+		} else if (rx_data[0] == (uint8_t)7) {
 			go_left();
-		} else if (rx_data[0] == 'D' || rx_data[0] == 'd') {
+		} else if (rx_data[0] == (uint8_t)3) {
 			go_right();
-		} else if (rx_data[0] == 'S' || rx_data[0] == 's') {
+		} else if (rx_data[0] == (uint8_t)15) {
 			go_backward();
 		} else {
 			stop();
+
 		}
 	}
 }

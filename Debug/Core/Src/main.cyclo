@@ -2,5 +2,5 @@
 ../Core/Src/main.c:123:6:SystemClock_Config	3
 ../Core/Src/main.c:165:6:HAL_UART_TxCpltCallback	1
 ../Core/Src/main.c:170:6:HAL_UART_RxCpltCallback	9
-../Core/Src/main.c:185:6:HAL_GPIO_EXTI_Callback	10
-../Core/Src/main.c:209:6:Error_Handler	1
+../Core/Src/main.c:185:6:HAL_GPIO_EXTI_Callback	6
+../Core/Src/main.c:210:6:Error_Handler	1
