@@ -95,7 +95,8 @@ int main(void)
 	MX_SPI2_Init();
 	MX_USART1_UART_Init();
 	/* USER CODE BEGIN 2 */
-	nrf24l01p_rx_init(2500, _1Mbps);
+	nrf24l01p_rx_init(2460, _1Mbps);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
 	HAL_UART_Transmit(&huart1, (uint8_t*)TxBuffer, TxBufferSize , 0xFFFF);
 	/* USER CODE END 2 */
 
@@ -123,9 +124,8 @@ void SystemClock_Config(void)
 	/** Initializes the RCC Oscillators according to the specified parameters
 	 * in the RCC_OscInitTypeDef structure.
 	 */
-	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-	RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-	RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
 	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
 	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
 	{
@@ -136,7 +136,7 @@ void SystemClock_Config(void)
 	 */
 	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
 			|RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
 	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
@@ -157,12 +157,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandler)
 {
 	if (RxBuffer[0] == 'W' || RxBuffer[0] == 'w') {
 		go_forward();
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 	} else if (RxBuffer[0] == 'A' || RxBuffer[0] == 'a') {
 		go_left();
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 	} else if (RxBuffer[0] == 'D' || RxBuffer[0] == 'd') {
 		go_right();
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 	} else if (RxBuffer[0] == 'S' || RxBuffer[0] == 's') {
 		go_backward();
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 	} else {
 		stop();
 	}
@@ -175,15 +179,19 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 		if (rx_data[0] == (uint8_t)1) {
 			go_forward();
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 		} else if (rx_data[0] == (uint8_t)7) {
 			go_left();
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 		} else if (rx_data[0] == (uint8_t)3) {
 			go_right();
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 		} else if (rx_data[0] == (uint8_t)15) {
 			go_backward();
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 		} else {
 			stop();
-
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 		}
 	}
 }

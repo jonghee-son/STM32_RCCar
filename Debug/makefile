@@ -60,8 +60,8 @@ all: main-build
 main-build: nRF24-F103.elf secondary-outputs
 
 # Tool invocations
-nRF24-F103.elf nRF24-F103.map: $(OBJS) $(USER_OBJS) C:\Users\jongh\Documents\repo\STM32CubeIDE\nRF24-F103\STM32F103RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "nRF24-F103.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\jongh\Documents\repo\STM32CubeIDE\nRF24-F103\STM32F103RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="nRF24-F103.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+nRF24-F103.elf nRF24-F103.map: $(OBJS) $(USER_OBJS) C:\Users\EH408\Documents\repo\nRF24-F103\STM32F103RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "nRF24-F103.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\EH408\Documents\repo\nRF24-F103\STM32F103RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="nRF24-F103.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
