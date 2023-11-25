@@ -98,7 +98,7 @@ int main(void)
   MX_SPI2_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-	nrf24l01p_tx_init(2500, _1Mbps);
+	nrf24l01p_tx_init(2460, _1Mbps);
 	HAL_UART_Transmit(&huart1, (uint8_t*)TxBuffer, TxBufferSize , 0xFFFF);
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
   /* USER CODE END 2 */
