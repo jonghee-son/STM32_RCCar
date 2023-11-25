@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+#include "stm32f1xx_hal.h"
+
 #define MOTOR_CONTROL GPIOA
 #define IN1 GPIO_PIN_0
 #define IN2 GPIO_PIN_1
