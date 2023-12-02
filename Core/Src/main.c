@@ -95,7 +95,7 @@ int main(void)
 	MX_SPI2_Init();
 	MX_USART1_UART_Init();
 	/* USER CODE BEGIN 2 */
-	nrf24l01p_rx_init(2460, _1Mbps);
+	nrf24l01p_rx_init(2462, _1Mbps); // Channel 11
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
 	HAL_UART_Transmit(&huart1, (uint8_t*)TxBuffer, TxBufferSize , 0xFFFF);
 	/* USER CODE END 2 */
@@ -157,16 +157,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandler)
 {
 	if (RxBuffer[0] == 'W' || RxBuffer[0] == 'w') {
 		go_forward();
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 	} else if (RxBuffer[0] == 'A' || RxBuffer[0] == 'a') {
 		go_left();
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 	} else if (RxBuffer[0] == 'D' || RxBuffer[0] == 'd') {
 		go_right();
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 	} else if (RxBuffer[0] == 'S' || RxBuffer[0] == 's') {
 		go_backward();
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 	} else {
 		stop();
 	}
